@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MPI: Salat Jumat - Kemenag RI</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        heading: ['Poppins', 'sans-serif'],
+                        arabic: ['Amiri', 'serif'],
+                    },
+                    colors: {
+                        emerald: { 50: '#ecfdf5', 100: '#d1fae5', 500: '#10b981', 600: '#059669', 700: '#047857', 800: '#065f46', 900: '#064e3b' },
+                        gold: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' }
+                    },
+                    animation: {
+                        'float': 'float 3s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'slide-up': 'slideUp 0.5s ease-out forwards',
+                        'fade-in': 'fadeIn 0.5s ease-out forwards',
+                    },
+                    keyframes: {
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        slideUp: { '0%': { transform: 'translateY(20px)', opacity: '0' }, '100%': { transform: 'translateY(0)', opacity: '1' } },
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome & html2pdf -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        body { -webkit-tap-highlight-color: transparent; background-color: #f0fdf4; scroll-behavior: smooth; }
+        .glass { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.5); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        #app-container { width: 100%; height: 100vh; overflow: hidden; position: relative; background: linear-gradient(135deg, #d1fae5 0%, #ecfdf5 100%); }
+        .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; overflow-y: auto; overflow-x: hidden; flex-direction: column; }
+        .screen.active { display: flex; }
+        
+        .arabic-text { font-family: 'Amiri', serif; font-size: 1.8rem; line-height: 2.5rem; text-align: right; direction: rtl; padding: 1rem 0; }
+        .btn-primary { background: linear-gradient(to right, #059669, #047857); color: white; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4); }
+        .btn-primary:active { transform: scale(0.95); }
+        
+        #global-modal, #dev-modal, #obj-modal { z-index: 1000; }
+        
+        @media print {
+            body * { visibility: hidden; }
+            #report-content, #report-content * { visibility: visible; }
+            #report-content { position: absolute; left: 0; top: 0; width: 100%; padding: 0; margin: 0; background: white; }
+            .no-print { display: none !important; }
+        }
+
+        .option-btn { transition: all 0.2s; border: 2px solid transparent; }
+        .option-btn.selected { border-color: #059669; background-color: #ecfdf5; transform: scale(1.02); }
+        .option-btn.correct { border-color: #059669; background-color: #d1fae5; color: #064e3b; }
+        .option-btn.wrong { border-color: #ef4444; background-color: #fee2e2; color: #7f1d1d; }
+
+        .story-box { background: white; border-left: 4px solid #059669; padding: 1rem; border-radius: 0.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1rem; font-size: 0.95rem; line-height: 1.6; color: #374151; }
+    </style>
+</head>
+<body class="text-gray-800 antialiased">
+
+<div id="app-container">
+
+    <!-- 1. SPLASH SCREEN -->
+    <div id="screen-splash" class="screen active justify-center items-center bg-emerald-700 text-white z-50">
+        <div class="text-center animate-pulse-slow">
+            <i class="fas fa-mosque text-7xl text-gold-400 mb-4 animate-float"></i>
+            <h1 class="font-heading text-4xl font-bold mb-2">Salat Jumat</h1>
+            <p class="text-emerald-200">Media Pembelajaran Interaktif MI</p>
+        </div>
+    </div>
+
+    <!-- 2. COVER SCREEN -->
+    <div id="screen-cover" class="screen justify-center items-center p-4">
+        <div class="absolute top-0 left-0 w-full h-64 bg-emerald-600 rounded-b-[4rem] opacity-20 -z-10"></div>
+        <div class="glass w-full max-w-md p-8 rounded-3xl text-center shadow-xl border-t-4 border-emerald-500 animate-slide-up">
+            <span class="inline-block px-3 py-1 bg-gold-100 text-gold-600 rounded-full text-xs font-bold tracking-wider mb-4">FIKIH • KELAS 4 • FASE B</span>
+            
+            <div class="relative w-40 h-40 mx-auto mb-6">
+                <svg viewBox="0 0 200 200" class="w-full h-full animate-float drop-shadow-md">
+                    <circle cx="100" cy="100" r="90" fill="#d1fae5" />
+                    <path d="M100 40 L160 140 L40 140 Z" fill="#059669" />
+                    <circle cx="100" cy="60" r="15" fill="#fbbf24" />
+                    <path d="M80 140 L80 100 L120 100 L120 140" fill="#ecfdf5" />
+                </svg>
+            </div>
+            
+            <h1 class="font-heading text-4xl font-extrabold text-emerald-800 mb-2">Salat Jumat</h1>
+            <p class="text-sm text-gray-500 mb-8 px-4">Memahami tata cara dan hikmah pelaksanaan salat Jumat</p>
+            
+            <div class="space-y-3">
+                <button onclick="nav('screen-login')" class="w-full btn-primary py-3 rounded-xl font-bold text-lg flex items-center justify-center gap-2">
+                    <i class="fas fa-play-circle"></i> MULAI BELAJAR
+                </button>
+                <div class="flex gap-2">
+                    <button onclick="showDevModal()" class="flex-1 bg-white text-emerald-700 border border-emerald-200 py-2.5 rounded-xl font-semibold text-sm hover:bg-emerald-50 transition shadow-sm">
+                        <i class="fas fa-user-tie mr-1"></i> Pengembang
+                    </button>
+                    <button onclick="showObjModal()" class="flex-1 bg-white text-emerald-700 border border-emerald-200 py-2.5 rounded-xl font-semibold text-sm hover:bg-emerald-50 transition shadow-sm">
+                        <i class="fas fa-bullseye mr-1"></i> Tujuan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Modal: Developer -->
+    <div id="dev-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm justify-center items-center p-4">
+        <div class="glass-modal w-full max-w-sm rounded-2xl p-6 text-center animate-slide-up relative">
+            <button onclick="document.getElementById('dev-modal').classList.remove('flex'); document.getElementById('dev-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            <div class="w-24 h-24 mx-auto bg-gray-200 rounded-full mb-4 border-4 border-emerald-100 overflow-hidden relative">
+                <img src="https://ui-avatars.com/api/?name=Alirido+S.Pd&background=10b981&color=fff&size=150" id="dev-img" class="w-full h-full object-cover" alt="Pengembang" onerror="this.src='https://ui-avatars.com/api/?name=Alirido+S.Pd&background=10b981&color=fff&size=150'">
+            </div>
+            <h3 class="font-heading font-bold text-xl text-gray-800">Alirido, S.Pd.</h3>
+            <p class="text-emerald-600 font-medium text-sm mb-1">MI Ulul Albab Boalemo</p>
+            <p class="text-xs text-gray-500 mb-6 bg-gray-50 p-2 rounded-lg break-all">aliulo766@madrasah.kemenag.go.id</p>
+            <button onclick="document.getElementById('dev-modal').classList.remove('flex'); document.getElementById('dev-modal').classList.add('hidden')" class="w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">Kembali ke Cover</button>
+        </div>
+    </div>
+
+    <!-- Floating Modal: Objectives -->
+    <div id="obj-modal" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-sm justify-center items-center p-4">
+        <div class="glass-modal w-full max-w-md rounded-2xl p-6 animate-slide-up relative">
+            <button onclick="document.getElementById('obj-modal').classList.remove('flex'); document.getElementById('obj-modal').classList.add('hidden')" class="absolute top-4 right-4 text-gray-400 hover:text-gray-600"><i class="fas fa-times text-xl"></i></button>
+            <h3 class="font-heading font-bold text-xl text-emerald-800 mb-4 border-b pb-2"><i class="fas fa-bullseye text-gold-500 mr-2"></i>Tujuan Pembelajaran</h3>
+            
+            <div class="bg-emerald-50 rounded-xl p-4 mb-4 border border-emerald-100">
+                <p class="text-sm text-gray-700 font-medium">Melalui media ini, siswa kelas 4 MI diharapkan mampu:</p>
+                <ul class="list-disc ml-5 mt-2 text-sm text-gray-600 space-y-1">
+                    <li>Memahami konsep dasar pelaksanaan salat Jumat dengan benar.</li>
+                    <li>Menganalisis syarat wajib dan syarat sah salat Jumat.</li>
+                    <li>Mengidentifikasi adab dan sunnah sebelum salat Jumat.</li>
+                </ul>
+            </div>
+            
+            <div class="bg-blue-50 rounded-xl p-4 mb-6 border border-blue-100">
+                <p class="text-xs font-bold text-blue-800 mb-1"><i class="fas fa-heart text-red-500 mr-1"></i>Kurikulum Berbasis Cinta (KBC)</p>
+                <p class="text-xs text-gray-600 italic">"Menumbuhkan cinta kepada Allah melalui ibadah, cinta sesama dengan shaf yang rapat, dan cinta alam dengan menjaga kebersihan masjid di wilayah Boalemo."</p>
+            </div>
+            
+            <button onclick="document.getElementById('obj-modal').classList.remove('flex'); document.getElementById('obj-modal').classList.add('hidden')" class="w-full bg-gray-100 text-gray-700 py-2 rounded-lg font-semibold hover:bg-gray-200 transition">Kembali ke Cover</button>
+        </div>
+    </div>
+
+    <!-- 3. LOGIN / IDENTITAS -->
+    <div id="screen-login" class="screen justify-center items-center p-4">
+        <button onclick="nav('screen-cover')" class="absolute top-4 left-4 w-10 h-10 bg-white rounded-full shadow flex items-center justify-center text-gray-500"><i class="fas fa-arrow-left"></i></button>
+        
+        <div class="glass w-full max-w-sm p-6 rounded-2xl shadow-lg">
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl"><i class="fas fa-user-graduate"></i></div>
+                <h2 class="font-heading text-2xl font-bold text-gray-800">Data Siswa</h2>
+                <p class="text-xs text-gray-500">Silakan isi identitasmu sebelum mulai</p>
+            </div>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-nama" placeholder="Cth: Ahmad Fatih" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white/50">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-gray-700 mb-1">Kelas</label>
+                    <select id="input-kelas" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 outline-none transition bg-white/50">
+                        <option value="">-- Pilih Kelas --</option>
+                        <option value="4A">Kelas 4A</option>
+                        <option value="4B">Kelas 4B</option>
+                        <option value="4C">Kelas 4C</option>
+                    </select>
+                </div>
+                <button onclick="saveStudent()" class="w-full btn-primary py-3 rounded-xl font-bold text-lg mt-2">Lanjut <i class="fas fa-chevron-right ml-1 text-sm"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PENGANTAR & PANDUAN (TUTORIAL) -->
+    <div id="screen-tutorial" class="screen justify-center items-center p-4 bg-emerald-900/5 backdrop-blur-sm">
+        <div class="w-full max-w-sm bg-white rounded-3xl shadow-xl overflow-hidden relative">
+            <div class="bg-emerald-500 p-6 text-center text-white relative">
+                <i class="fas fa-hand-sparkles text-4xl mb-2 text-gold-300"></i>
+                <h2 id="welcome-text" class="font-heading text-xl font-bold">Selamat Datang!</h2>
+            </div>
+            
+            <div class="p-6 h-64 relative">
+                <div id="tut-1" class="tut-slide text-center absolute inset-0 p-6 flex flex-col justify-center transition-opacity duration-300">
+                    <i class="fas fa-book-open text-4xl text-emerald-500 mb-4"></i>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">1. Belajar Mendalam</h3>
+                    <p class="text-sm text-gray-600">Pelajari materi Fikih tentang Salat Jumat yang dilengkapi nilai cinta dan konteks wilayah Boalemo.</p>
+                </div>
+                <div id="tut-2" class="tut-slide text-center absolute inset-0 p-6 flex flex-col justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+                    <i class="fas fa-gamepad text-4xl text-gold-500 mb-4"></i>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">2. Bermain Sambil Belajar</h3>
+                    <p class="text-sm text-gray-600">Selesaikan tantangan interaktif berstimulus cerita lokal setelah menu Belajar selesai.</p>
+                </div>
+                <div id="tut-3" class="tut-slide text-center absolute inset-0 p-6 flex flex-col justify-center opacity-0 pointer-events-none transition-opacity duration-300">
+                    <i class="fas fa-pen-nib text-4xl text-blue-500 mb-4"></i>
+                    <h3 class="font-bold text-lg text-gray-800 mb-2">3. Berlatih & Evaluasi</h3>
+                    <p class="text-sm text-gray-600">Uji pemahamanmu dengan soal berjenjang dan dapatkan Laporan Hasil Belajar di akhir sesi.</p>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-gray-50 border-t flex justify-between items-center">
+                <div class="flex gap-1" id="tut-dots">
+                    <div class="w-2 h-2 rounded-full bg-emerald-500"></div>
+                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                    <div class="w-2 h-2 rounded-full bg-gray-300"></div>
+                </div>
+                <button id="tut-btn" onclick="nextTutorial()" class="bg-emerald-600 text-white px-5 py-2 rounded-lg font-semibold text-sm shadow-md">Selanjutnya</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. MAIN MENU (DASHBOARD) -->
+    <div id="screen-menu" class="screen pb-20">
+        <div class="bg-emerald-600 text-white p-6 rounded-b-3xl shadow-lg relative">
+            <div class="absolute top-0 right-0 opacity-10"><i class="fas fa-mosque text-9xl"></i></div>
+            <div class="flex justify-between items-center relative z-10">
+                <div>
+                    <p class="text-emerald-100 text-sm">Ahlan wa Sahlan,</p>
+                    <h2 id="dash-name" class="font-heading text-xl font-bold truncate w-48">Siswa</h2>
+                    <p id="dash-class" class="text-xs bg-emerald-700 inline-block px-2 py-0.5 rounded mt-1">Kelas</p>
+                </div>
+                <div class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-emerald-600 text-xl border-2 border-gold-400">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-4 mt-2 space-y-4 max-w-md mx-auto w-full">
+            <h3 class="font-bold text-gray-700 mb-2 px-1 text-lg">Pilih Aktivitas</h3>
+            
+            <div onclick="openLayer('belajar')" class="bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 flex items-center gap-4 cursor-pointer transform transition active:scale-95">
+                <div class="w-14 h-14 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center text-2xl shadow-inner">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-gray-800 text-lg">1. Belajar</h4>
+                    <p class="text-xs text-gray-500">Materi & Konsep Fikih</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center">
+                    <i class="fas fa-unlock"></i>
+                </div>
+            </div>
+
+            <div id="menu-bermain" onclick="openLayer('bermain')" class="bg-gray-50 rounded-2xl p-4 shadow-sm border border-gray-200 flex items-center gap-4 cursor-not-allowed opacity-75 grayscale transition-all duration-500">
+                <div class="w-14 h-14 rounded-xl bg-gray-200 text-gray-500 flex items-center justify-center text-2xl shadow-inner">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-gray-600 text-lg">2. Bermain</h4>
+                    <p class="text-xs text-gray-400">Tantangan Interaktif</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+
+            <div id="menu-berlatih" onclick="openLayer('berlatih')" class="bg-gray-50 rounded-2xl p-4 shadow-sm border border-gray-200 flex items-center gap-4 cursor-not-allowed opacity-75 grayscale transition-all duration-500">
+                <div class="w-14 h-14 rounded-xl bg-gray-200 text-gray-500 flex items-center justify-center text-2xl shadow-inner">
+                    <i class="fas fa-pen-clip"></i>
+                </div>
+                <div class="flex-1">
+                    <h4 class="font-bold text-gray-600 text-lg">3. Berlatih</h4>
+                    <p class="text-xs text-gray-400">Soal Asesmen Berjenjang</p>
+                </div>
+                <div class="w-8 h-8 rounded-full bg-red-50 text-red-400 flex items-center justify-center">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. LAYER BELAJAR -->
+    <div id="screen-belajar" class="screen bg-white">
+        <div class="bg-white p-4 border-b flex items-center justify-between sticky top-0 z-10 shadow-sm">
+            <button onclick="nav('screen-menu')" class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-gray-600"><i class="fas fa-arrow-left"></i></button>
+            <h2 class="font-bold text-emerald-800">Materi Belajar</h2>
+            <div class="text-sm font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded"><span id="belajar-counter">1</span>/6</div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 hide-scrollbar" id="belajar-content-area"></div>
+        <div class="p-4 bg-gray-50 border-t sticky bottom-0">
+            <div id="belajar-activity-area" class="mb-3"></div>
+            <div class="flex gap-2">
+                <button id="btn-belajar-prev" onclick="prevBelajar()" class="px-4 py-2 bg-gray-200 rounded-lg font-semibold text-gray-600 disabled:opacity-50"><i class="fas fa-chevron-left"></i></button>
+                <button id="btn-belajar-next" onclick="nextBelajar()" class="flex-1 btn-primary py-2 rounded-lg font-bold text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed">Selanjutnya</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. LAYER BERMAIN -->
+    <div id="screen-bermain" class="screen bg-orange-50">
+        <div class="bg-gold-500 p-4 border-b flex items-center justify-between sticky top-0 z-10 shadow-sm text-white">
+            <button onclick="nav('screen-menu')" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fas fa-arrow-left"></i></button>
+            <h2 class="font-bold">Tantangan Bermain</h2>
+            <div class="text-sm font-bold bg-white/30 px-2 py-1 rounded"><span id="bermain-counter">1</span>/10</div>
+        </div>
+        <div class="p-4 overflow-y-auto hide-scrollbar flex-1 relative">
+            <div class="w-full bg-orange-200 rounded-full h-1.5 mb-4">
+                <div id="bermain-progress" class="bg-gold-500 h-1.5 rounded-full" style="width: 10%"></div>
+            </div>
+            <div id="bermain-content" class="animate-fade-in"></div>
+        </div>
+    </div>
+
+    <!-- 8. LAYER BERLATIH -->
+    <div id="screen-berlatih" class="screen bg-blue-50">
+        <div class="bg-blue-600 p-4 border-b flex items-center justify-between sticky top-0 z-10 shadow-sm text-white">
+            <button onclick="confirmExitBerlatih()" class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center"><i class="fas fa-times"></i></button>
+            <h2 class="font-bold">Asesmen Fikih</h2>
+            <div class="text-sm font-bold bg-white/30 px-2 py-1 rounded"><span id="berlatih-counter">1</span>/10</div>
+        </div>
+        <div class="p-4 overflow-y-auto hide-scrollbar flex-1">
+             <div class="w-full bg-blue-200 rounded-full h-1.5 mb-4">
+                <div id="berlatih-progress" class="bg-blue-500 h-1.5 rounded-full" style="width: 10%"></div>
+            </div>
+            <div id="berlatih-content" class="animate-fade-in"></div>
+        </div>
+    </div>
+
+    <!-- 9. REPORT SCREEN -->
+    <div id="screen-report" class="screen bg-gray-100 p-4 pb-20 justify-start items-center">
+        <div class="w-full max-w-2xl bg-white p-6 md:p-8 rounded-2xl shadow-xl mt-4" id="report-content">
+            
+            <!-- KOP Laporan -->
+            <div class="border-b-4 border-emerald-600 pb-4 mb-6 flex items-center gap-4">
+                <div class="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 text-3xl shrink-0"><i class="fas fa-mosque"></i></div>
+                <div class="flex-1 text-center pr-16">
+                    <h2 class="font-heading font-bold text-xl md:text-2xl text-gray-800">HASIL BELAJAR - SALAT JUMAT</h2>
+                    <p class="text-sm text-gray-600 font-semibold">Media Pembelajaran Interaktif Fikih</p>
+                    <p class="text-xs text-gray-500">Pengembang: Alirido, S.Pd. - MI Ulul Albab Boalemo</p>
+                </div>
+            </div>
+
+            <!-- Data Siswa -->
+            <div class="bg-emerald-50 rounded-xl p-4 mb-6 border border-emerald-100 grid grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs text-gray-500">Nama Siswa</p>
+                    <p id="rep-name" class="font-bold text-gray-800 text-lg uppercase"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500">Kelas</p>
+                    <p id="rep-class" class="font-bold text-gray-800 text-lg"></p>
+                </div>
+                <div class="col-span-2 border-t border-emerald-100 pt-2 mt-2">
+                    <p class="text-xs text-gray-500">Waktu Selesai</p>
+                    <p id="rep-date" class="font-medium text-gray-700 text-sm"></p>
+                </div>
+            </div>
+
+            <!-- Status Sinkronisasi Database -->
+            <div id="status-gs" class="text-center text-sm font-semibold text-gray-500 mb-6 bg-gray-50 p-2 rounded border">
+                <!-- Status sinkronisasi database akan muncul di sini -->
+            </div>
+
+            <!-- Nilai Area -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <!-- Bermain -->
+                <div class="border rounded-xl p-4 text-center">
+                    <p class="text-sm font-semibold text-gray-500 mb-2">Nilai Bermain</p>
+                    <div class="w-20 h-20 mx-auto rounded-full border-4 border-gold-400 flex items-center justify-center mb-2">
+                        <span id="rep-score-bermain" class="text-2xl font-bold text-gold-600">0</span>
+                    </div>
+                    <p class="text-xs text-gray-500">Akurasi Tantangan</p>
+                </div>
+                <!-- Berlatih (Utama) -->
+                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4 text-center relative overflow-hidden">
+                    <div class="absolute -right-4 -bottom-4 opacity-10"><i class="fas fa-medal text-6xl"></i></div>
+                    <p class="text-sm font-bold text-blue-800 mb-2">NILAI ASESMEN (BERLATIH)</p>
+                    <div class="w-24 h-24 mx-auto rounded-full bg-white border-4 border-blue-500 shadow-md flex items-center justify-center mb-2 relative z-10">
+                        <span id="rep-score-berlatih" class="text-4xl font-bold text-blue-700">0</span>
+                    </div>
+                    <p id="rep-predikat" class="text-sm font-bold uppercase text-blue-600"></p>
+                </div>
+            </div>
+
+            <!-- Analisis Level -->
+            <div class="mb-6">
+                <h4 class="font-bold text-gray-700 mb-3 text-sm border-b pb-1">Analisis Penguasaan Materi:</h4>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                        <span>Level 1 (Dasar/Pemahaman)</span>
+                        <span id="rep-l1" class="font-bold text-gray-800"></span>
+                    </div>
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                        <span>Level 2 (Penerapan)</span>
+                        <span id="rep-l2" class="font-bold text-gray-800"></span>
+                    </div>
+                    <div class="flex justify-between items-center bg-gray-50 p-2 rounded">
+                        <span>Level 3 (Penalaran / HOTS)</span>
+                        <span id="rep-l3" class="font-bold text-gray-800"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pesan KBC -->
+            <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded-r-xl mb-4">
+                <p class="text-xs font-bold text-green-700 mb-1"><i class="fas fa-heart mr-1"></i> Catatan Kurikulum Berbasis Cinta (KBC)</p>
+                <p class="text-sm text-gray-600 italic">"Alhamdulillah, ananda telah mempelajari adab salat Jumat. Mari wujudkan cinta kepada Allah dengan mendirikan salat, cinta sesama warga Boalemo dengan saling menghargai, dan cinta alam dengan menjaga kebersihan masjid."</p>
+            </div>
+            
+             <p class="text-center text-xs text-gray-400 mt-8 mb-4">Scan/Simpan laporan ini sebagai bukti pengerjaan.</p>
+        </div>
+        
+        <div class="w-full max-w-2xl mt-4 space-y-3 no-print">
+            <button onclick="downloadPDF()" class="w-full bg-blue-600 text-white py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition shadow-lg">
+                <i class="fas fa-download"></i> Unduh / Cetak Laporan PDF
+            </button>
+            <button onclick="nav('screen-menu')" class="w-full bg-white text-gray-700 border py-3 rounded-xl font-bold hover:bg-gray-50 transition">
+                Kembali ke Menu Utama
+            </button>
+        </div>
+    </div>
+
+    <!-- GLOBAL CUSTOM MODAL -->
+    <div id="global-modal" class="hidden fixed inset-0 bg-gray-900/60 backdrop-blur-sm justify-center items-center p-4">
+        <div class="glass-modal w-full max-w-sm rounded-2xl p-6 text-center animate-slide-up">
+            <div id="gm-icon" class="w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4"></div>
+            <h3 id="gm-title" class="font-heading font-bold text-xl text-gray-800 mb-2"></h3>
+            <p id="gm-desc" class="text-sm text-gray-600 mb-6"></p>
+            <div id="gm-actions" class="flex gap-2 justify-center">
+                <button id="gm-btn-ok" class="btn-primary px-8 py-2.5 rounded-xl font-semibold w-full">OK</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /* =======================================================
+       DEKLARASI URL GOOGLE APPS SCRIPT (BACKEND)
+       ======================================================= */
+    // GANTI URL DI BAWAH INI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA!
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbzU9TDvllgowvuy97b0OvKdPcPEWzUhuBIsqMogIq77tXTWQ93HlH6M6R2GmdOim47a/exec";
+
+    /* =======================================================
+       STATE MANAGEMENT & DATA
+       ======================================================= */
+    const state = {
+        student: { name: "", class: "", date: "" },
+        progress: {
+            belajar: false, bermain: false, berlatih: false,
+            belajarSlide: 0,
+            belajarActivities: [false, false, false, false, false, false]
+        },
+        bermain: { current: 0, score: 0, answers: [] },
+        berlatih: { current: 0, score: 0, details: [] }
+    };
+
+    const materiData = [
+        {
+            title: "Pengertian & Hukum",
+            visual: `<div class="w-full flex justify-center mb-6 mt-2"><div class="w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center text-5xl text-emerald-600 border-4 border-emerald-200 animate-float relative shadow-lg"><i class="fas fa-sun absolute -top-2 -right-2 text-gold-500 text-3xl animate-[spin_4s_linear_infinite]"></i><i class="fas fa-mosque"></i></div></div>`,
+            arabic: "يَا أَيُّهَا الَّذِينَ آمَنُوا إِذَا نُودِيَ لِلصَّلَاةِ مِنْ يَوْمِ الْجُمُعَةِ فَاسْعَوْا إِلَىٰ ذِكْرِ اللَّهِ وَذَرُوا الْبَيْعَ",
+            arti: "Wahai orang-orang yang beriman! Apabila telah diseru untuk melaksanakan salat pada hari Jumat, maka segeralah kamu mengingat Allah dan tinggalkanlah jual beli. (QS. Al-Jumu'ah: 9)",
+            content: `Salat Jumat adalah salat dua rakaat yang dilaksanakan secara berjamaah pada waktu Dzuhur di hari Jumat, didahului dengan dua khutbah. Hukumnya adalah <b>Fardhu 'Ain</b> (wajib bagi setiap individu) laki-laki muslim yang memenuhi syarat.<br><br>
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400 mt-2 text-sm">
+                <b>Konteks Lokal & KBC:</b> Di desa-desa agraris Kabupaten Boalemo, para petani yang sedang di ladang atau nelayan yang bersiap melaut wajib meninggalkan pekerjaannya sejenak saat azan Jumat berkumandang. Ini wujud <b>cinta kepada Allah</b> yang mengutamakan panggilan-Nya di atas urusan dunia.
+            </div>`,
+            q_text: "Apa hukum melaksanakan salat Jumat bagi laki-laki muslim?",
+            options: ["Sunnah Muakkad", "Fardhu Kifayah", "Fardhu 'Ain"],
+            correct: 2
+        },
+        {
+            title: "Syarat Wajib Salat Jumat",
+            visual: `<div class="w-full flex justify-center mb-6 mt-2"><div class="w-28 h-28 bg-blue-100 rounded-full flex items-center justify-center text-5xl text-blue-600 border-4 border-blue-200 animate-float shadow-lg relative"><i class="fas fa-check-circle absolute -bottom-2 -right-2 text-green-500 text-3xl bg-white rounded-full"></i><i class="fas fa-person-praying"></i></div></div>`,
+            arabic: "", arti: "",
+            content: `Tidak semua orang wajib melaksanakan salat Jumat. Syarat wajibnya meliputi:<br>
+            1. Islam<br>2. Baligh (dewasa)<br>3. Berakal sehat<br>4. Laki-laki<br>5. Sehat (tidak sakit parah)<br>6. Bermukim (bukan musafir).<br><br>
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400 mt-2 text-sm">
+                <b>Konteks Lokal & KBC:</b> Jika ada seorang warga di Desa Tilamuta (Boalemo) yang sedang sakit parah sehingga tidak kuat berjalan ke masjid, maka Islam memberikan keringanan (Rukhsoh). Ia cukup salat Dzuhur di rumah. Ini bukti ajaran Islam penuh <b>kasih sayang</b> dan tidak memberatkan umatnya.
+            </div>`,
+            q_text: "Siapakah di bawah ini yang TIDAK wajib salat Jumat, namun tetap sah jika ikut?",
+            options: ["Laki-laki dewasa yang sehat", "Perempuan dan anak-anak", "Kepala desa yang mukim"],
+            correct: 1
+        },
+        {
+            title: "Syarat Sah Salat Jumat",
+            visual: `<div class="w-full flex justify-center mb-6 mt-2"><div class="w-28 h-28 bg-gold-100 rounded-full flex items-center justify-center text-5xl text-gold-600 border-4 border-gold-200 animate-float shadow-lg relative"><i class="fas fa-users text-4xl mt-4"></i><i class="fas fa-mosque absolute top-4 opacity-50 text-3xl"></i></div></div>`,
+            arabic: "", arti: "",
+            content: `Agar salat Jumat sah, harus memenuhi syarat berikut:<br>
+            1. Dilaksanakan di tempat yang menetap (perkampungan/masjid).<br>
+            2. Dilakukan secara berjamaah (menurut mazhab Syafi'i minimal 40 orang).<br>
+            3. Dilaksanakan pada waktu Dzuhur.<br>
+            4. Didahului dengan dua Khutbah Jumat.<br><br>
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400 mt-2 text-sm">
+                <b>KBC (Cinta Sesama):</b> Syarat berjamaah mengajarkan warga Boalemo untuk berkumpul, saling mengenal, dan menjaga kerukunan antar warga dari berbagai profesi di satu masjid desa yang sama.
+            </div>`,
+            q_text: "Kapan waktu pelaksanaan salat Jumat?",
+            options: ["Waktu salat Ashar", "Waktu salat Dzuhur", "Pagi hari (Dhuha)"],
+            correct: 1
+        },
+        {
+            title: "Sunnah Sebelum Salat",
+            visual: `<div class="w-full flex justify-center mb-6 mt-2"><div class="w-28 h-28 bg-teal-100 rounded-full flex items-center justify-center text-5xl text-teal-600 border-4 border-teal-200 animate-bounce shadow-lg relative"><i class="fas fa-sparkles absolute top-2 right-2 text-gold-400 text-2xl animate-pulse"></i><i class="fas fa-shower"></i></div></div>`,
+            arabic: "يَا بَنِي آدَمَ خُذُوا زِينَتَكُمْ عِنْدَ كُلِّ مَسْجِدٍ",
+            arti: "Hai anak Adam, pakailah pakaianmu yang indah di setiap (memasuki) masjid... (QS. Al-A'raf: 31)",
+            content: `Sebelum berangkat ke masjid pada hari Jumat, disunnahkan untuk:<br>
+            1. Mandi sunnah Jumat.<br>2. Memotong kuku dan merapikan rambut.<br>3. Memakai pakaian yang bersih (disunnahkan putih).<br>4. Memakai wewangian.<br>5. Menyegerakan berangkat ke masjid.<br><br>
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400 mt-2 text-sm">
+                <b>KBC (Cinta Lingkungan & Diri):</b> Mandi dan memakai wangi-wangian sebelum ke masjid menunjukkan kepedulian pada kebersihan diri. Udara masjid di Boalemo yang asri akan tetap segar dan jamaah merasa nyaman (tidak terganggu bau badan).
+            </div>`,
+            q_text: "Manakah amalan sunnah sebelum berangkat salat Jumat?",
+            options: ["Mandi dan memotong kuku", "Makan dengan kenyang", "Tidur siang terlebih dahulu"],
+            correct: 0
+        },
+        {
+            title: "Adab Saat Khutbah",
+            visual: `<div class="w-full flex justify-center mb-6 mt-2"><div class="w-28 h-28 bg-red-100 rounded-full flex items-center justify-center text-5xl text-red-500 border-4 border-red-200 animate-pulse-slow shadow-lg"><i class="fas fa-comment-slash"></i></div></div>`,
+            arabic: "", arti: "",
+            content: `Khutbah Jumat adalah bagian tak terpisahkan dari ibadah salat Jumat. Adab saat khatib sedang berkhutbah adalah:<br>
+            1. Diam dan mendengarkan dengan saksama.<br>
+            2. Tidak boleh berbicara ngobrol dengan teman.<br>
+            3. Fokus dan tidak bermain-main (seperti main HP atau kerikil).<br>
+            <i>"Barangsiapa yang berkata kepada temannya 'diamlah' pada hari Jumat saat imam sedang berkhutbah, maka ia telah melakukan hal yang sia-sia." (HR. Bukhari)</i><br><br>
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400 mt-2 text-sm">
+                <b>KBC (Akhlak):</b> Mendengarkan khatib dengan tenang adalah bentuk penghormatan dan <b>cinta kepada ilmu</b> serta adab terhadap pemimpin agama.
+            </div>`,
+            q_text: "Apa yang terjadi jika kita mengobrol saat khatib sedang berkhutbah?",
+            options: ["Salatnya menjadi batal", "Pahala salat Jumatnya menjadi sia-sia", "Mendapat pahala tambahan"],
+            correct: 1
+        },
+        {
+            title: "Hikmah Salat Jumat",
+            visual: `<div class="w-full flex justify-center mb-6 mt-2"><div class="w-28 h-28 bg-emerald-100 rounded-full flex items-center justify-center text-5xl text-emerald-500 border-4 border-emerald-200 animate-float shadow-lg relative"><i class="fas fa-heart absolute -bottom-2 -right-2 text-pink-500 text-3xl animate-pulse"></i><i class="fas fa-handshake"></i></div></div>`,
+            arabic: "", arti: "",
+            content: `Salat Jumat menyimpan banyak hikmah luar biasa, di antaranya:<br>
+            1. Simbol persatuan umat Islam.<br>
+            2. Menghapus dosa-dosa kecil antara Jumat satu dengan Jumat berikutnya.<br>
+            3. Menumbuhkan sifat disiplin waktu.<br>
+            4. Menjadi sarana penyampaian informasi dan nasehat keagamaan melalui khutbah.<br><br>
+            <div class="bg-blue-50 p-3 rounded-lg border-l-4 border-blue-400 mt-2 text-sm">
+                <b>KBC (Cinta Tanah Air):</b> Persatuan yang terbangun di masjid-masjid kampung di Boalemo menjadi modal sosial yang kuat untuk menjaga keutuhan NKRI dan kedamaian masyarakat madani.
+            </div>`,
+            q_text: "Salah satu hikmah pelaksanaan salat Jumat berjamaah adalah?",
+            options: ["Menunjukkan kekayaan warga", "Memupuk persatuan dan kerukunan umat", "Ajang untuk berdagang di masjid"],
+            correct: 1
+        }
+    ];
+
+    const bermainData = [
+        { stimulus: "Setiap hari Jumat tiba, kesibukan warga di Desa Modelomo, Kabupaten Boalemo, mulai berubah. Pak Budi yang sedang mencangkul di ladang jagung, dan Mang Udin yang sedang merapikan jaring ikannya, segera menghentikan aktivitas mereka begitu mendengar suara azan Dzuhur berkumandang dari Masjid Al-Ikhlas desa tersebut.", q: "Sikap Pak Budi dan Mang Udin yang meninggalkan pekerjaannya menunjukkan ketaatan pada hukum salat Jumat, yaitu...", options: ["Fardhu Kifayah", "Sunnah Muakkad", "Fardhu 'Ain"], ans: 2 },
+        { stimulus: "Irfan adalah siswa kelas 4 MI Ulul Albab Boalemo. Sebelum berangkat salat Jumat, ia memotong kuku, mandi bersih menggunakan sabun wangi, dan memakai baju koko putih kesayangannya yang disetrika rapi oleh ibunya.", q: "Aktivitas yang dilakukan Irfan sebelum ke masjid termasuk dalam kategori...", options: ["Syarat sah salat Jumat", "Sunnah salat Jumat", "Syarat wajib salat Jumat"], ans: 1 },
+        { stimulus: "Saat pelaksanaan salat Jumat di Masjid Jami' Boalemo, jemaah sudah membludak. Ahmad tiba di masjid saat khatib sedang membacakan khutbah kedua. Di sampingnya, ada dua orang jamaah dewasa yang justru asyik berbisik-bisik membicarakan hasil panen jagung.", q: "Bagaimana hukum tindakan dua orang jamaah yang mengobrol saat khutbah berlangsung?", options: ["Boleh karena membahas pekerjaan", "Sia-sia dan menghilangkan pahala Jumat", "Membatalkan wudhu mereka"], ans: 1 },
+        { stimulus: "Rombongan pedagang kain dari luar kota datang ke Pasar Tilamuta, Boalemo. Mereka berencana menginap selama 2 hari di penginapan pasar. Hari itu adalah hari Jumat. Karena mereka dalam perjalanan jauh (musafir) dan berniat tinggal kurang dari 4 hari, mereka memiliki keringanan.", q: "Bagi musafir laki-laki, kewajiban melaksanakan salat Jumat...", options: ["Gugur, cukup menggantinya dengan salat Dzuhur", "Tetap wajib fardhu 'ain tanpa alasan", "Diganti dengan salat Ashar"], ans: 0 },
+        { stimulus: "Desa pesisir di Boalemo baru saja dimekarkan. Warga bergotong-royong membangun sebuah masjid permanen di tengah pemukiman agar mereka bisa menyelenggarakan salat Jumat sendiri, tidak perlu berjalan jauh ke desa tetangga.", q: "Mendirikan salat Jumat di tempat yang menetap (perkampungan/kota) merupakan salah satu dari...", options: ["Syarat wajib", "Rukun khutbah", "Syarat sah"], ans: 2 },
+        { stimulus: "Kakek Hasan, seorang tokoh masyarakat di Boalemo, sedang sakit parah dan terbaring lemah di tempat tidurnya. Ia bahkan tidak kuat untuk berdiri. Hari ini adalah hari Jumat, dan ia merasa sedih tidak bisa pergi ke masjid.", q: "Apa yang harus dilakukan Kakek Hasan pada hari tersebut?", options: ["Dipapah paksa ke masjid karena wajib", "Tidak perlu salat apapun karena sakit", "Salat Dzuhur di rumahnya sesuai kemampuan"], ans: 2 },
+        { stimulus: "Dalam Al-Qur'an Surah Al-Jumu'ah ayat 9, Allah SWT memerintahkan umat Islam agar segera memenuhi panggilan azan salat Jumat dan meninggalkan suatu kegiatan.", q: "Kegiatan duniawi apakah yang secara spesifik disebut dalam ayat tersebut untuk ditinggalkan?", options: ["Tidur siang", "Jual beli (perdagangan)", "Bermain"], ans: 1 },
+        { stimulus: "Siti adalah anak perempuan yang rajin beribadah. Pada hari libur sekolah, ia ingin sekali ikut salat Jumat berjamaah di masjid raya kabupaten bersama ayah dan kakak laki-lakinya. Ayahnya mengizinkan, namun menjelaskan hukumnya.", q: "Bagaimana hukum salat Jumat bagi Siti (perempuan)?", options: ["Tidak wajib, tetapi jika ikut mengerjakannya salatnya sah", "Wajib fardhu 'ain seperti laki-laki", "Haram dan tidak boleh masuk masjid"], ans: 0 },
+        { stimulus: "Saat khutbah berlangsung, Khatib mengingatkan jamaah untuk menjaga kelestarian lingkungan pesisir laut Boalemo dari sampah plastik. Hal ini selaras dengan Kurikulum Berbasis Cinta (KBC).", q: "Pesan khatib tersebut merupakan wujud dari...", options: ["Cinta kepada harta", "Cinta kelestarian alam dan lingkungan", "Cinta tanah air"], ans: 1 },
+        { stimulus: "Salat Jumat terdiri dari beberapa rangkaian. Setelah khatib selesai menyampaikan khutbah pertama dan kedua, barulah bilal mengumandangkan iqamah.", q: "Berapa rakaat salat Jumat dikerjakan setelah khutbah?", options: ["4 Rakaat", "3 Rakaat", "2 Rakaat"], ans: 2 }
+    ];
+
+    const berlatihData = [
+        { level: 1, weight: 8, stimulus: "Agama Islam mengatur tata cara peribadatan secara rinci, termasuk pelaksanaan salat pada hari Jumat. Ibadah ini memiliki kedudukan istimewa karena hari Jumat dianggap sebagai 'sayyidul ayyam' atau rajanya hari bagi umat Islam.", q: "Berdasarkan syariat Islam, melaksanakan salat Jumat bagi laki-laki yang sudah baligh dan sehat hukumnya adalah...", options: ["Fardhu Kifayah", "Sunnah Muakkad", "Fardhu 'Ain"], ans: 2 },
+        { level: 1, weight: 8, stimulus: "Dalam pelaksanaan salat Jumat, jamaah diwajibkan untuk mendengarkan khutbah. Khutbah ini merupakan salah satu syarat sahnya salat Jumat.", q: "Ada berapa jumlah khutbah yang wajib disampaikan oleh khatib sebelum pelaksanaan salat Jumat?", options: ["Satu kali", "Dua kali", "Tiga kali"], ans: 1 },
+        { level: 1, weight: 8, stimulus: "Sebelum melangkahkan kaki menuju masjid pada hari Jumat, seorang muslim dianjurkan untuk membersihkan diri sebagai bentuk adab menghadap Allah SWT.", q: "Manakah amalan berikut yang termasuk sunnah sebelum melaksanakan salat Jumat?", options: ["Memakai pakaian yang bersih dan wewangian", "Berpuasa dari pagi hingga azan Dzuhur", "Mengqadha salat yang tertinggal"], ans: 0 },
+        { level: 2, weight: 10, stimulus: "Di sebuah desa agraris di Kabupaten Boalemo, sebagian besar warga berprofesi sebagai petani ladang. Suatu ketika, waktu menanam padi bertepatan dengan hari Jumat. Saat matahari mulai meninggi dan mendekati waktu Dzuhur, azan Jumat berkumandang dari masjid desa.", q: "Tindakan paling tepat yang harus dilakukan oleh para petani laki-laki tersebut adalah...", options: ["Melanjutkan menanam padi sampai selesai baru salat Dzuhur", "Meninggalkan ladang segera untuk bersiap menuju masjid", "Menugaskan satu orang saja ke masjid sebagai wakil kelompok"], ans: 1 },
+        { level: 2, weight: 10, stimulus: "Andi, siswa MI Ulul Albab Boalemo, datang ke masjid desa untuk salat Jumat. Saat Andi duduk di shaf tengah, khatib sedang memberikan nasehat tentang pentingnya menjaga kebersihan sungai. Teman di sebelahnya tiba-tiba mengajak Andi mengobrol.", q: "Sikap yang harus diambil Andi sesuai dengan adab salat Jumat adalah...", options: ["Membalas obrolan dengan suara yang sangat pelan", "Diam tidak membalas obrolan dan tetap fokus mendengarkan khatib", "Menegur temannya dengan suara keras agar diam"], ans: 1 },
+        { level: 2, weight: 10, stimulus: "Pak Rahmat adalah seorang pedagang antar kota. Pada hari Jumat, ia sedang dalam perjalanan bisnis (musafir) dari Boalemo menuju kota lain yang berjarak sangat jauh. Saat waktu Dzuhur tiba, bus yang ditumpanginya berhenti di sebuah terminal yang tidak memiliki fasilitas masjid untuk salat Jumat berjamaah.", q: "Sebagai musafir, bagaimana aturan ibadah Pak Rahmat pada waktu tersebut?", options: ["Wajib mencari masjid di kota terdekat bagaimanapun caranya", "Gugur kewajiban Jumatnya, dan cukup melaksanakan salat Dzuhur", "Dihukum berdosa karena bepergian pada hari Jumat"], ans: 1 },
+        { level: 2, weight: 10, stimulus: "Pada masa liburan, Desa Tilamuta dikunjungi banyak wisatawan. Di antara wisatawan tersebut terdapat rombongan anak-anak sekolah dasar yang belum baligh dan beberapa ibu-ibu. Mereka berada di dekat masjid raya saat azan Jumat dikumandangkan.", q: "Ketentuan fikih yang berlaku bagi rombongan anak-anak belum baligh dan ibu-ibu tersebut adalah...", options: ["Mereka diwajibkan ikut salat Jumat berjamaah", "Mereka tidak wajib salat Jumat, namun diwajibkan salat Dzuhur", "Mereka bebas dari kewajiban salat pada hari itu"], ans: 1 },
+        { level: 3, weight: 12, stimulus: "Di kawasan pesisir Boalemo, cuaca ekstrem tiba-tiba melanda tepat sebelum azan Jumat. Hujan badai sangat deras, angin kencang, dan jalan tanah menuju masjid desa menjadi sangat berlumpur dan membahayakan keselamatan warga, terutama lansia. Imam masjid menyadari situasi kritis ini.", q: "Berdasarkan prinsip kemudahan (rukhsoh) dalam Islam dan menjaga keselamatan jiwa (Hifzh An-Nafs), keputusan fikih apa yang paling tepat dalam kondisi force majeure ini?", options: ["Warga tetap diwajibkan menerjang badai menuju masjid demi menggugurkan Fardhu 'Ain.", "Kewajiban salat Jumat gugur karena udzur syar'i (cuaca ekstrem yang membahayakan), warga dianjurkan salat Dzuhur di rumah masing-masing.", "Salat Jumat ditunda pelaksanaannya hingga sore hari ketika badai mereda."], ans: 1 },
+        { level: 3, weight: 12, stimulus: "Sebuah kompleks perumahan baru di Boalemo sedang merintis pelaksanaan salat Jumat sendiri di lapangan terbuka perumahan, karena masjid terdekat jaraknya lebih dari 5 KM. Namun, jumlah warga laki-laki mukim (penduduk tetap) yang baligh di kompleks tersebut hanya berjumlah 15 orang, sementara pandangan mazhab Syafi'i mensyaratkan minimal 40 orang.", q: "Berdasarkan literasi fikih yang lebih luas, jika mereka memaksakan diri melaksanakan salat Jumat, bagaimana status hukumnya menurut syarat sah berjamaah dalam mazhab Syafi'i yang umum dipakai di Indonesia?", options: ["Salat Jumatnya sah karena dilakukan di lapangan terbuka.", "Salat Jumatnya tidak sah karena tidak memenuhi syarat kuota minimal 40 orang jamaah mukim, sehingga harus kembali salat Dzuhur.", "Salat Jumatnya sah asalkan khutbah dibaca sangat panjang."], ans: 1 },
+        { level: 3, weight: 12, stimulus: "Ayat Al-Qur'an surah Al-Jumu'ah ayat 9 melarang keras aktivitas 'jual-beli' setelah azan Jumat berkumandang. Dalam konteks modern di Boalemo, Pak Budi adalah seorang developer aplikasi yang sedang melakukan transaksi online dari rumahnya melalui HP, tepat saat khatib sudah naik mimbar di masjid sebelah rumahnya.", q: "Melalui proses qiyas (analogi) hukum Islam dari ayat tersebut, bagaimana status transaksi online yang dilakukan Pak Budi?", options: ["Haram, karena esensi larangan adalah segala bentuk kesibukan duniawi yang melalaikan ibadah Jumat, baik offline maupun online.", "Halal, karena transaksi online tidak melibatkan tatap muka fisik seperti di pasar tradisional.", "Makruh, karena dilakukan di dalam rumah bukan di pasar."], ans: 0 }
+    ];
+
+    /* =======================================================
+       ROUTING & UI CONTROLS
+       ======================================================= */
+    function nav(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+        if(screenId === 'screen-menu') updateDashboard();
+    }
+
+    function showModal(title, desc, type='info', onOk=null) {
+        const modal = document.getElementById('global-modal');
+        const icon = document.getElementById('gm-icon');
+        document.getElementById('gm-title').innerText = title;
+        document.getElementById('gm-desc').innerHTML = desc;
+        
+        icon.className = 'w-16 h-16 mx-auto rounded-full flex items-center justify-center text-3xl mb-4 text-white ';
+        if(type === 'error') { icon.classList.add('bg-red-500'); icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>'; }
+        else if(type === 'success') { icon.classList.add('bg-green-500'); icon.innerHTML = '<i class="fas fa-check"></i>'; }
+        else if(type === 'lock') { icon.classList.add('bg-orange-500'); icon.innerHTML = '<i class="fas fa-lock"></i>'; }
+        else { icon.classList.add('bg-blue-500'); icon.innerHTML = '<i class="fas fa-info"></i>'; }
+
+        const btnOk = document.getElementById('gm-btn-ok');
+        btnOk.onclick = () => {
+            modal.classList.remove('flex'); modal.classList.add('hidden');
+            if(onOk) onOk();
+        };
+        modal.classList.remove('hidden'); modal.classList.add('flex');
+    }
+
+    function showDevModal() { document.getElementById('dev-modal').classList.remove('hidden'); document.getElementById('dev-modal').classList.add('flex'); }
+    function showObjModal() { document.getElementById('obj-modal').classList.remove('hidden'); document.getElementById('obj-modal').classList.add('flex'); }
+
+    /* =======================================================
+       LOGIN & TUTORIAL
+       ======================================================= */
+    function saveStudent() {
+        const name = document.getElementById('input-nama').value.trim();
+        const cls = document.getElementById('input-kelas').value;
+        if(!name || !cls) {
+            showModal("Data Belum Lengkap", "Silakan isi nama dan pilih kelas terlebih dahulu.", "error");
+            return;
+        }
+        state.student.name = name;
+        state.student.class = cls;
+        document.getElementById('welcome-text').innerText = `Ahlan, ${name}!`;
+        
+        state.progress = { belajar: false, bermain: false, berlatih: false, belajarSlide: 0, belajarActivities: Array(6).fill(false) };
+        tutIndex = 1; updateTutorialUI();
+        nav('screen-tutorial');
+    }
+
+    let tutIndex = 1;
+    function updateTutorialUI() {
+        [1,2,3].forEach(i => {
+            const el = document.getElementById(`tut-${i}`);
+            if(i === tutIndex) { el.classList.remove('opacity-0', 'pointer-events-none'); el.classList.add('opacity-100'); }
+            else { el.classList.add('opacity-0', 'pointer-events-none'); el.classList.remove('opacity-100'); }
+        });
+        const dots = document.getElementById('tut-dots').children;
+        Array.from(dots).forEach((d, idx) => {
+            d.className = `w-2 h-2 rounded-full ${idx + 1 === tutIndex ? 'bg-emerald-500' : 'bg-gray-300'}`;
+        });
+        document.getElementById('tut-btn').innerText = tutIndex === 3 ? "Mulai Belajar" : "Selanjutnya";
+    }
+    function nextTutorial() {
+        if(tutIndex < 3) { tutIndex++; updateTutorialUI(); }
+        else { nav('screen-menu'); }
+    }
+
+    /* =======================================================
+       MAIN MENU LOGIC
+       ======================================================= */
+    function updateDashboard() {
+        document.getElementById('dash-name').innerText = state.student.name;
+        document.getElementById('dash-class').innerText = state.student.class;
+
+        const mBermain = document.getElementById('menu-bermain');
+        const mBerlatih = document.getElementById('menu-berlatih');
+
+        if(state.progress.belajar) {
+            mBermain.className = "bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 flex items-center gap-4 cursor-pointer transform transition active:scale-95";
+            mBermain.innerHTML = `<div class="w-14 h-14 rounded-xl bg-gold-100 text-gold-600 flex items-center justify-center text-2xl shadow-inner"><i class="fas fa-gamepad"></i></div><div class="flex-1"><h4 class="font-bold text-gray-800 text-lg">2. Bermain</h4><p class="text-xs text-gray-500">Tantangan Interaktif</p></div><div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="fas fa-unlock"></i></div>`;
+        }
+        if(state.progress.bermain) {
+            mBerlatih.className = "bg-white rounded-2xl p-4 shadow-sm border border-emerald-100 flex items-center gap-4 cursor-pointer transform transition active:scale-95";
+            mBerlatih.innerHTML = `<div class="w-14 h-14 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center text-2xl shadow-inner"><i class="fas fa-pen-clip"></i></div><div class="flex-1"><h4 class="font-bold text-gray-800 text-lg">3. Berlatih</h4><p class="text-xs text-gray-500">Soal Asesmen Berjenjang</p></div><div class="w-8 h-8 rounded-full bg-emerald-50 text-emerald-500 flex items-center justify-center"><i class="fas fa-unlock"></i></div>`;
+        }
+    }
+
+    function openLayer(layer) {
+        if(layer === 'belajar') {
+            state.progress.belajarSlide = 0;
+            renderBelajar();
+            nav('screen-belajar');
+        } else if (layer === 'bermain') {
+            if(!state.progress.belajar) {
+                showModal("Terkunci!", "Selesaikan menu <b>BELAJAR</b> terlebih dahulu untuk membuka tantangan Bermain.", "lock");
+                return;
+            }
+            state.bermain = { current: 0, score: 0, answers: [] };
+            renderBermain();
+            nav('screen-bermain');
+        } else if (layer === 'berlatih') {
+            if(!state.progress.bermain) {
+                showModal("Terkunci!", "Selesaikan menu <b>BERMAIN</b> terlebih dahulu untuk mengikuti Asesmen.", "lock");
+                return;
+            }
+            state.berlatih = { current: 0, score: 0, details: [] };
+            renderBerlatih();
+            nav('screen-berlatih');
+        }
+    }
+
+    /* =======================================================
+       BELAJAR LOGIC
+       ======================================================= */
+    function renderBelajar() {
+        const idx = state.progress.belajarSlide;
+        const data = materiData[idx];
+        document.getElementById('belajar-counter').innerText = idx + 1;
+        
+        let contentHtml = `<h3 class="font-heading font-bold text-2xl text-emerald-800 border-b-2 border-emerald-200 pb-2 mb-4">${data.title}</h3>`;
+        if(data.visual) contentHtml += data.visual;
+        if(data.arabic) {
+            contentHtml += `<p class="arabic-text text-gray-900">${data.arabic}</p>`;
+            contentHtml += `<p class="text-sm text-gray-600 italic mb-4 bg-gray-50 p-3 rounded-lg border-l-2 border-gray-300">"${data.arti}"</p>`;
+        }
+        contentHtml += `<div class="text-gray-700 leading-relaxed mb-8">${data.content}</div>`;
+        document.getElementById('belajar-content-area').innerHTML = contentHtml;
+        document.getElementById('belajar-content-area').scrollTop = 0;
+
+        const isDone = state.progress.belajarActivities[idx];
+        let actHtml = `<div class="bg-white p-4 rounded-xl border-2 ${isDone ? 'border-green-400 bg-green-50' : 'border-gold-300'} shadow-sm">
+            <p class="font-bold text-sm text-gray-800 mb-2"><i class="fas fa-question-circle text-gold-500 mr-1"></i> Tantangan Pemahaman:</p>
+            <p class="text-sm mb-3">${data.q_text}</p><div class="space-y-2">`;
+        
+        data.options.forEach((opt, i) => {
+            let btnClass = "w-full text-left p-3 rounded-lg text-sm font-medium border bg-gray-50 text-gray-700 option-btn";
+            if(isDone && i === data.correct) btnClass += " correct";
+            actHtml += `<button ${isDone ? 'disabled' : `onclick="checkBelajarActivity(${i}, ${data.correct})"`} class="${btnClass}" id="b-opt-${i}">${String.fromCharCode(65+i)}. ${opt}</button>`;
+        });
+        actHtml += `</div></div>`;
+        document.getElementById('belajar-activity-area').innerHTML = actHtml;
+
+        document.getElementById('btn-belajar-prev').disabled = (idx === 0);
+        const btnNext = document.getElementById('btn-belajar-next');
+        if(idx === 5) { btnNext.innerText = "Selesai Belajar"; btnNext.disabled = !state.progress.belajarActivities[5]; } 
+        else { btnNext.innerText = "Selanjutnya"; btnNext.disabled = !state.progress.belajarActivities[idx]; }
+    }
+
+    function checkBelajarActivity(selected, correct) {
+        const idx = state.progress.belajarSlide;
+        if(selected === correct) {
+            state.progress.belajarActivities[idx] = true;
+            document.getElementById(`b-opt-${selected}`).classList.add('correct');
+            showModal("Hebat!", "Jawaban kamu benar. Silakan lanjut ke materi berikutnya.", "success", () => renderBelajar());
+        } else {
+            document.getElementById(`b-opt-${selected}`).classList.add('wrong');
+            setTimeout(() => document.getElementById(`b-opt-${selected}`).classList.remove('wrong'), 1000);
+        }
+    }
+    function prevBelajar() { if(state.progress.belajarSlide > 0) { state.progress.belajarSlide--; renderBelajar(); } }
+    function nextBelajar() {
+        const idx = state.progress.belajarSlide;
+        if(!state.progress.belajarActivities[idx]) return;
+        if(idx < 5) { state.progress.belajarSlide++; renderBelajar(); } 
+        else { state.progress.belajar = true; showModal("Selamat!", "Kamu telah menyelesaikan semua materi. Menu <b>BERMAIN</b> kini telah terbuka!", "success", () => nav('screen-menu')); }
+    }
+
+    /* =======================================================
+       BERMAIN LOGIC (Gamification)
+       ======================================================= */
+    function renderBermain() {
+        const idx = state.bermain.current;
+        const data = bermainData[idx];
+        document.getElementById('bermain-counter').innerText = idx + 1;
+        document.getElementById('bermain-progress').style.width = `${(idx/10)*100}%`;
+
+        let html = `
+            <div class="story-box text-sm mb-4 bg-white border-l-4 border-gold-500 p-4 rounded-xl shadow-sm">
+                <span class="text-xs font-bold text-gold-600 uppercase mb-1 block"><i class="fas fa-book-open"></i> Cerita Konteks</span>
+                ${data.stimulus}
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
+                <h4 class="font-bold text-gray-800 text-lg mb-4 leading-tight">${data.q}</h4>
+                <div class="space-y-3">
+        `;
+        data.options.forEach((opt, i) => {
+            html += `<button onclick="checkBermain(${i}, ${data.ans})" class="w-full text-left p-4 rounded-xl font-medium border-2 border-gray-200 bg-gray-50 hover:bg-gold-50 hover:border-gold-300 transition-colors text-gray-700 option-btn" id="play-opt-${i}">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 mt-0.5">${String.fromCharCode(65+i)}</div>
+                    <span>${opt}</span>
+                </div>
+            </button>`;
+        });
+        html += `</div></div>`;
+        document.getElementById('bermain-content').innerHTML = html;
+    }
+
+    function checkBermain(selected, correct) {
+        const opts = document.querySelectorAll('[id^="play-opt-"]');
+        opts.forEach(o => o.disabled = true); // Disable all
+        
+        const currentQ = bermainData[state.bermain.current];
+        const isCorrect = (selected === correct);
+
+        // Simpan Data Jawaban untuk Spreadsheet
+        state.bermain.answers.push({
+            pertanyaan: currentQ.q,
+            opsi: currentQ.options,
+            kunci: String.fromCharCode(65 + correct),
+            jawabanSiswa: selected,
+            benar: isCorrect
+        });
+
+        if(isCorrect) {
+            document.getElementById(`play-opt-${selected}`).classList.add('correct');
+            state.bermain.score += 10; // 100 max
+            setTimeout(() => nextBermain(true), 1000);
+        } else {
+            document.getElementById(`play-opt-${selected}`).classList.add('wrong');
+            document.getElementById(`play-opt-${correct}`).classList.add('correct');
+            setTimeout(() => nextBermain(false), 2000);
+        }
+    }
+
+    function nextBermain(isCorrect) {
+        if(state.bermain.current < 9) {
+            state.bermain.current++;
+            renderBermain();
+        } else {
+            state.progress.bermain = true;
+            showModal("Bermain Selesai!", `Kamu mendapat skor: <b>${state.bermain.score}</b>.<br>Menu <b>BERLATIH</b> kini telah terbuka!`, "success", () => nav('screen-menu'));
+        }
+    }
+
+    /* =======================================================
+       BERLATIH LOGIC (Assessment)
+       ======================================================= */
+    function renderBerlatih() {
+        const idx = state.berlatih.current;
+        const data = berlatihData[idx];
+        document.getElementById('berlatih-counter').innerText = idx + 1;
+        document.getElementById('berlatih-progress').style.width = `${(idx/10)*100}%`;
+
+        let levelLabel = data.level === 1 ? "Level 1: Dasar" : data.level === 2 ? "Level 2: Penerapan" : "Level 3: Penalaran / HOTS";
+        let levelColor = data.level === 1 ? "bg-green-100 text-green-700" : data.level === 2 ? "bg-yellow-100 text-yellow-700" : "bg-red-100 text-red-700";
+
+        let html = `
+            <div class="flex justify-between items-center mb-3">
+                <span class="text-xs font-bold px-2 py-1 rounded ${levelColor}">${levelLabel}</span>
+                <span class="text-xs font-bold text-gray-500">Bobot: ${data.weight} Poin</span>
+            </div>
+            <div class="story-box text-sm mb-4 border-l-4 border-blue-500 p-4 rounded-xl bg-white shadow-sm">
+                ${data.stimulus}
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-md border border-gray-100">
+                <h4 class="font-bold text-gray-800 text-lg mb-4 leading-tight">${data.q}</h4>
+                <div class="space-y-3">
+        `;
+        data.options.forEach((opt, i) => {
+            html += `<button onclick="checkBerlatih(${i}, ${data.ans}, ${data.weight}, ${data.level})" class="w-full text-left p-4 rounded-xl font-medium border-2 border-gray-200 bg-gray-50 hover:bg-blue-50 hover:border-blue-300 transition-colors text-gray-700 option-btn" id="latih-opt-${i}">
+                <div class="flex items-start gap-3">
+                    <div class="w-6 h-6 rounded-full bg-gray-200 flex items-center justify-center text-xs shrink-0 mt-0.5">${String.fromCharCode(65+i)}</div>
+                    <span>${opt}</span>
+                </div>
+            </button>`;
+        });
+        html += `</div></div>`;
+        document.getElementById('berlatih-content').innerHTML = html;
+    }
+
+    function checkBerlatih(selected, correct, weight, level) {
+        const opts = document.querySelectorAll('[id^="latih-opt-"]');
+        opts.forEach(o => o.disabled = true);
+        
+        const isCorrect = (selected === correct);
+        const currentQ = berlatihData[state.berlatih.current];
+
+        if(isCorrect) {
+            document.getElementById(`latih-opt-${selected}`).classList.add('correct');
+            state.berlatih.score += weight;
+        } else {
+            document.getElementById(`latih-opt-${selected}`).classList.add('wrong');
+            document.getElementById(`latih-opt-${correct}`).classList.add('correct');
+        }
+
+        // Simpan detail untuk analisis dan Spreadsheet
+        state.berlatih.details.push({ 
+            pertanyaan: currentQ.q,
+            opsi: currentQ.options,
+            kunci: String.fromCharCode(65 + correct),
+            jawabanSiswa: selected,
+            benar: isCorrect,
+            level: level, 
+            weight: weight 
+        });
+
+        setTimeout(() => {
+            if(state.berlatih.current < 9) {
+                state.berlatih.current++;
+                renderBerlatih();
+            } else {
+                finishBerlatih();
+            }
+        }, 1500); 
+    }
+
+    function confirmExitBerlatih() {
+        showModal("Keluar Asesmen?", "Nilai kamu tidak akan tersimpan jika keluar sekarang.", "error", () => nav('screen-menu'));
+    }
+
+    /* =======================================================
+       REPORT GENERATION & API PUSH
+       ======================================================= */
+    function finishBerlatih() {
+        state.progress.berlatih = true;
+        const now = new Date();
+        const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()} ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`;
+        state.student.date = dateStr;
+
+        document.getElementById('rep-name').innerText = state.student.name;
+        document.getElementById('rep-class').innerText = state.student.class;
+        document.getElementById('rep-date').innerText = dateStr;
+        document.getElementById('rep-score-bermain').innerText = state.bermain.score;
+        document.getElementById('rep-score-berlatih').innerText = state.berlatih.score;
+
+        let predikat = "";
+        const s = state.berlatih.score;
+        if(s >= 90) predikat = "Sangat Baik (Mumtaz)";
+        else if(s >= 75) predikat = "Baik (Jayyid)";
+        else if(s >= 60) predikat = "Cukup (Maqbul)";
+        else predikat = "Perlu Bimbingan";
+        document.getElementById('rep-predikat').innerText = predikat;
+
+        let l1Total = 3, l1Benar = 0, l2Total = 4, l2Benar = 0, l3Total = 3, l3Benar = 0;
+        state.berlatih.details.forEach(d => {
+            if(d.level === 1 && d.benar) l1Benar++;
+            if(d.level === 2 && d.benar) l2Benar++;
+            if(d.level === 3 && d.benar) l3Benar++;
+        });
+
+        document.getElementById('rep-l1').innerText = `${l1Benar}/${l1Total} Benar`;
+        document.getElementById('rep-l2').innerText = `${l2Benar}/${l2Total} Benar`;
+        document.getElementById('rep-l3').innerText = `${l3Benar}/${l3Total} Benar`;
+
+        nav('screen-report');
+        
+        // --- KIRIM DATA KE GOOGLE SHEETS ---
+        kirimDataKeGS();
+    }
+
+    function kirimDataKeGS() {
+        const btnGS = document.getElementById('status-gs');
+        
+        if (!GAS_URL || GAS_URL === "URL_GAS_ANDA_DISINI") {
+            btnGS.innerHTML = '<i class="fas fa-exclamation-triangle text-orange-500"></i> Pengembang belum menyetel URL Database';
+            return;
+        }
+
+        const payload = {
+            nama: state.student.name,
+            kelas: state.student.class,
+            bermainDetails: state.bermain.answers,
+            berlatihDetails: state.berlatih.details
+        };
+
+        btnGS.innerHTML = '<i class="fas fa-spinner fa-spin text-blue-500"></i> Mengirim data ke server...';
+
+        // Menggunakan fetch API dengan text/plain agar tidak terkena blokir CORS Preflight 
+        fetch(GAS_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'text/plain;charset=utf-8',
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.status === "success") {
+                btnGS.innerHTML = '<i class="fas fa-check-circle text-green-500"></i> Data nilai berhasil tersimpan di server';
+            } else {
+                throw new Error("Gagal dari server");
+            }
+        })
+        .catch(err => {
+            console.error("Gagal mengirim:", err);
+            btnGS.innerHTML = '<i class="fas fa-times-circle text-red-500"></i> Gagal menyimpan data (cek koneksi internet)';
+        });
+    }
+
+    function downloadPDF() {
+        const element = document.getElementById('report-content');
+        const opt = {
+            margin:       0.5,
+            filename:     `Hasil_Belajar_${state.student.name.replace(/\s+/g, '_')}_Fikih.pdf`,
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+        };
+
+        const btn = document.querySelector('button[onclick="downloadPDF()"]');
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Menyiapkan PDF...';
+        btn.disabled = true;
+
+        if(typeof html2pdf !== 'undefined') {
+            html2pdf().set(opt).from(element).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }).catch(err => {
+                console.error("PDF Error: ", err);
+                window.print();
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        } else {
+            window.print();
+            btn.innerHTML = originalText;
+            btn.disabled = false;
+        }
+    }
+
+    /* =======================================================
+       INIT APP
+       ======================================================= */
+    window.onload = () => {
+        setTimeout(() => { nav('screen-cover'); }, 2000);
+    };
+
+</script>
+</body>
+</html>
